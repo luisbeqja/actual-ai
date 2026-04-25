@@ -1,3 +1,30 @@
+const STOP_WORDS = new Set([
+  '', 'and', 'or', 'the', 'of', 'a', 'an', 'to', 'for', 'in', 'on',
+]);
+
+function stemWord(word: string): string {
+  if (word.length <= 3) return word;
+  if (word.endsWith('ies') && word.length > 4) return `${word.slice(0, -3)}y`;
+  if (word.endsWith('sses')) return word.slice(0, -2);
+  if (
+    word.endsWith('xes')
+    || word.endsWith('zes')
+    || word.endsWith('ches')
+    || word.endsWith('shes')
+  ) return word.slice(0, -2);
+  if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+}
+
+function tokenize(normalized: string): Set<string> {
+  return new Set(
+    normalized
+      .split(' ')
+      .map(stemWord)
+      .filter((w) => !STOP_WORDS.has(w)),
+  );
+}
+
 class SimilarityCalculator {
   public calculateNameSimilarity(name1: string, name2: string): number {
     // Normalize the strings for comparison
@@ -6,16 +33,25 @@ class SimilarityCalculator {
 
     if (a === b) return 1.0;
 
-    // Check for exact word matches
-    const words1 = new Set(a.split(' '));
-    const words2 = new Set(b.split(' '));
+    // Build word sets after stemming + stopword removal so plurals
+    // ("sport"/"sports") and connectors ("&", "and") don't create
+    // spurious mismatches.
+    const words1 = tokenize(a);
+    const words2 = tokenize(b);
 
     // Calculate Jaccard similarity for words
     const intersection = new Set([...words1].filter((x) => words2.has(x)));
     const union = new Set([...words1, ...words2]);
 
-    // Weight for word overlap
-    const wordSimilarity = intersection.size / union.size;
+    const wordSimilarity = union.size === 0 ? 0 : intersection.size / union.size;
+
+    // Subset boost: when one name's content words are fully contained in
+    // the other's, the shorter name is likely a coarser version of the
+    // same concept ("Travel" vs "Travel Transport"). Nudge the score so
+    // these cluster together instead of bloating the category list.
+    const smallerSize = Math.min(words1.size, words2.size);
+    const isSubset = smallerSize > 0 && intersection.size === smallerSize;
+    const subsetBoost = isSubset ? 0.15 : 0;
 
     // Jaro-Winkler for character-level similarity
     const jaro = (s1: string, s2: string) => {
@@ -55,8 +91,8 @@ class SimilarityCalculator {
 
     const charSimilarity = jaro(a, b);
 
-    // Combine word-level and character-level similarity
-    return 0.6 * wordSimilarity + 0.4 * charSimilarity;
+    // Combine word-level and character-level similarity, capped at 1.0
+    return Math.min(1.0, 0.6 * wordSimilarity + 0.4 * charSimilarity + subsetBoost);
   }
 }
 
