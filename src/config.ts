@@ -39,6 +39,11 @@ export const guessedTag = process.env.GUESSED_TAG ?? '#actual-ai';
 export const groqApiKey = process.env.GROQ_API_KEY ?? '';
 export const groqModel = process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile';
 export const groqBaseURL = process.env.GROQ_BASE_URL ?? 'https://api.groq.com/openai/v1';
+export const bedrockRegion = process.env.BEDROCK_REGION ?? process.env.AWS_REGION ?? '';
+export const bedrockAccessKeyId = process.env.BEDROCK_ACCESS_KEY_ID ?? process.env.AWS_ACCESS_KEY_ID ?? '';
+export const bedrockSecretAccessKey = process.env.BEDROCK_SECRET_ACCESS_KEY ?? process.env.AWS_SECRET_ACCESS_KEY ?? '';
+export const bedrockSessionToken = process.env.BEDROCK_SESSION_TOKEN ?? process.env.AWS_SESSION_TOKEN ?? '';
+export const bedrockModel = process.env.BEDROCK_MODEL ?? 'anthropic.claude-3-5-sonnet-20241022-v2:0';
 export const valueSerpApiKey = process.env.VALUESERP_API_KEY ?? '';
 export interface FeatureFlag {
   enabled: boolean;

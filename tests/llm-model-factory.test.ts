@@ -23,6 +23,11 @@ describe('LlmModelFactory', () => {
       'groq-api-key',
       'groq-model',
       'https://api.groq.com',
+      'us-east-1',
+      'bedrock-access-key-id',
+      'bedrock-secret-access-key',
+      '',
+      'anthropic.claude-3-5-sonnet-20241022-v2:0',
     );
   }
 
@@ -64,6 +69,13 @@ describe('LlmModelFactory', () => {
     const model = sut.create();
     expect(model).toBeDefined();
     expect(model.provider).toEqual('groq.chat');
+  });
+
+  it('should create a Bedrock model', () => {
+    const sut = createSut('bedrock');
+    const model = sut.create();
+    expect(model).toBeDefined();
+    expect(model.modelId).toEqual('anthropic.claude-3-5-sonnet-20241022-v2:0');
   });
 
   it('should throw an error for an unknown provider', () => {

@@ -4,6 +4,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOllama } from 'ollama-ai-provider';
 import { createGroq } from '@ai-sdk/groq';
+import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
 import { LlmModelFactoryI } from './types';
 
 class LlmModelFactory implements LlmModelFactoryI {
@@ -47,6 +48,16 @@ class LlmModelFactory implements LlmModelFactoryI {
 
   private readonly groqBaseURL: string;
 
+  private readonly bedrockRegion: string;
+
+  private readonly bedrockAccessKeyId: string;
+
+  private readonly bedrockSecretAccessKey: string;
+
+  private readonly bedrockSessionToken: string;
+
+  private readonly bedrockModel: string;
+
   constructor(
     llmProvider: string,
     openaiApiKey: string,
@@ -68,6 +79,11 @@ class LlmModelFactory implements LlmModelFactoryI {
     groqApiKey: string,
     groqModel: string,
     groqBaseURL: string,
+    bedrockRegion: string,
+    bedrockAccessKeyId: string,
+    bedrockSecretAccessKey: string,
+    bedrockSessionToken: string,
+    bedrockModel: string,
   ) {
     this.llmProvider = llmProvider;
     this.openaiApiKey = openaiApiKey;
@@ -89,6 +105,11 @@ class LlmModelFactory implements LlmModelFactoryI {
     this.groqApiKey = groqApiKey;
     this.groqModel = groqModel;
     this.groqBaseURL = groqBaseURL;
+    this.bedrockRegion = bedrockRegion;
+    this.bedrockAccessKeyId = bedrockAccessKeyId;
+    this.bedrockSecretAccessKey = bedrockSecretAccessKey;
+    this.bedrockSessionToken = bedrockSessionToken;
+    this.bedrockModel = bedrockModel;
   }
 
   public create(): LanguageModel {
@@ -140,6 +161,15 @@ class LlmModelFactory implements LlmModelFactoryI {
           apiKey: this.groqApiKey,
         });
         return groq(this.groqModel) as unknown as LanguageModel;
+      }
+      case 'bedrock': {
+        const bedrock = createAmazonBedrock({
+          region: this.bedrockRegion || undefined,
+          accessKeyId: this.bedrockAccessKeyId || undefined,
+          secretAccessKey: this.bedrockSecretAccessKey || undefined,
+          sessionToken: this.bedrockSessionToken || undefined,
+        });
+        return bedrock(this.bedrockModel) as unknown as LanguageModel;
       }
       default:
         throw new Error(`Unknown provider: ${this.llmProvider}`);

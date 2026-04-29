@@ -7,6 +7,11 @@ import {
   anthropicApiKey,
   anthropicBaseURL,
   anthropicModel,
+  bedrockAccessKeyId,
+  bedrockModel,
+  bedrockRegion,
+  bedrockSecretAccessKey,
+  bedrockSessionToken,
   budgetId,
   dataDir,
   e2ePassword,
@@ -86,6 +91,11 @@ const llmModelFactory = new LlmModelFactory(
   groqApiKey,
   groqModel,
   groqBaseURL,
+  bedrockRegion,
+  bedrockAccessKeyId,
+  bedrockSecretAccessKey,
+  bedrockSessionToken,
+  bedrockModel,
 );
 
 const actualApiService = new ActualApiService(
